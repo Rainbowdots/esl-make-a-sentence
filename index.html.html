@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>造句練習</title>
+<style>
+  :root{
+    --bg:#F7F3EE;
+    --text:#2B2B2B;
+    --card:#DCD5CB;
+    --terracotta:#B85042;
+    --sage:#6E8B7C;
+    --gray:#8A8A8A;
+    --white:#FFFFFF;
+    --ok:#6E8B7C;
+    --bad:#B85042;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#20201E; --text:#EDE8E0; --card:#3A3733; --white:#2C2A27; --gray:#A3A3A3;
+    }
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--text);
+    font-family:-apple-system,"Segoe UI","PingFang TC","Microsoft JhengHei",sans-serif;}
+  body{min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:32px 16px 60px;}
+
+  .top{width:100%;max-width:760px;text-align:center;margin-bottom:18px;}
+  h1{font-size:22px;font-weight:700;margin:0 0 6px;}
+  .sub{font-size:14px;color:var(--gray);margin:0;}
+
+  .levels{display:flex;gap:8px;margin:22px 0 26px;flex-wrap:wrap;justify-content:center;}
+  .level-btn{
+    border:1px solid var(--card); background:var(--white); color:var(--text);
+    border-radius:10px; padding:10px 16px; font-size:15px; cursor:pointer;
+    font-weight:600;
+  }
+  .level-btn.active{background:var(--terracotta); color:#fff; border-color:var(--terracotta);}
+  .level-btn .done-mark{color:var(--sage); margin-left:4px; font-weight:700;}
+  .level-btn.active .done-mark{color:#fff;}
+
+  .card{
+    width:100%;max-width:760px; background:var(--white); border:1px solid var(--card);
+    border-radius:16px; padding:28px 24px 24px;
+  }
+
+  .progress{font-size:13px;color:var(--gray); margin-bottom:14px;}
+
+  .zh{font-size:16px; color:var(--gray); margin-bottom:18px; line-height:1.5;}
+
+  .slots{
+    display:flex; flex-wrap:wrap; gap:10px; min-height:58px;
+    padding:14px; border:2px dashed var(--card); border-radius:12px; margin-bottom:22px;
+    align-items:center;
+  }
+  .slot-chip{
+    background:var(--bg); border:1px solid var(--card); border-radius:8px;
+    padding:9px 14px; font-size:17px; cursor:pointer; user-select:none;
+  }
+  .slot-chip:hover{border-color:var(--terracotta);}
+  .slots.empty-hint::before{
+    content:"點下面的字卡，依序組成句子"; color:var(--gray); font-size:14px;
+  }
+
+  .bank{display:flex; flex-wrap:wrap; gap:10px; margin-bottom:22px;}
+  .chip{
+    background:var(--card); border:none; border-radius:8px; padding:10px 16px;
+    font-size:17px; cursor:pointer; color:var(--text); font-weight:600;
+  }
+  .chip:hover{background:var(--sage); color:#fff;}
+  .chip:disabled{opacity:0; pointer-events:none;}
+
+  .actions{display:flex; gap:10px; flex-wrap:wrap;}
+  .btn{
+    border:none; border-radius:10px; padding:12px 20px; font-size:15px;
+    cursor:pointer; font-weight:700;
+  }
+  .btn-check{background:var(--terracotta); color:#fff;}
+  .btn-reset{background:var(--white); color:var(--text); border:1px solid var(--card);}
+  .btn-next{background:var(--sage); color:#fff;}
+  .btn:disabled{opacity:.4; cursor:default;}
+
+  .feedback{margin-top:16px; font-size:15px; min-height:24px; font-weight:600;}
+  .feedback.ok{color:var(--ok);}
+  .feedback.bad{color:var(--bad);}
+
+  .done-screen{text-align:center; padding:40px 10px;}
+  .done-screen .big{font-size:40px; margin-bottom:10px;}
+</style>
+</head>
+<body>
+
+<div class="top">
+  <h1>造句練習</h1>
+  <p class="sub">一關一關慢慢來，不會的句子可以按「重來」</p>
+</div>
+
+<div class="levels" id="levels"></div>
+
+<div class="card" id="card"></div>
+
+<script>
+// ===== 四關句型資料 =====
+// chunks：句子切成的字卡，answer 用 index 順序代表正確排法（這裡字卡本身就依序打亂即可）
+const LEVELS = [
+  {
+    title: "第一關　A is B",
+    sentences: [
+      { zh: "我阿姨是一位工程師。", chunks: ["My aunt", "is", "an engineer", "."] },
+      { zh: "賴瑞是一位誠實的學生。", chunks: ["Larry", "is", "an honest student", "."] },
+      { zh: "凱西是一位勤勉的學生。", chunks: ["Kathy", "is", "a hard-working student", "."] },
+      { zh: "女神卡卡是一個榜樣。", chunks: ["Lady Gaga", "is", "a role model", "."] },
+      { zh: "艾倫害怕蜘蛛。", chunks: ["Allan", "is", "afraid of spiders", "."] },
+    ],
+  },
+  {
+    title: "第二關　主詞＋動詞＋受詞",
+    sentences: [
+      { zh: "珍妮烤了蛋糕。", chunks: ["Jenny", "baked", "the cake", "."] },
+      { zh: "山姆煎了兩顆蛋。", zh2: "", chunks: ["Sam", "fried", "two eggs", "."] },
+      { zh: "我們慶祝我的生日。", chunks: ["We", "celebrate", "my birthday", "."] },
+      { zh: "約瑟夫養了一隻蜘蛛當寵物。", chunks: ["Joseph", "keeps", "a spider", "as his pet", "."] },
+      { zh: "我到處找我的手機。", chunks: ["I", "looked", "everywhere", "for my cellphone", "."] },
+    ],
+  },
+  {
+    title: "第三關　be＋形容詞＋介系詞",
+    sentences: [
+      { zh: "我厭倦了坐在沙發上。", chunks: ["I", "am", "tired of", "sitting on the couch", "."] },
+      { zh: "這些孩子對這部電影感到厭煩。", chunks: ["The kids", "are", "bored with", "the movie", "."] },
+      { zh: "艾倫害怕蜘蛛。", chunks: ["Allan", "is", "scared of", "spiders", "."] },
+      { zh: "我對我妹妹很生氣。", chunks: ["I", "was", "mad at", "my sister", "."] },
+      { zh: "她對漫畫書很感興趣。", chunks: ["She", "is", "interested in", "comic books", "."] },
+    ],
+  },
+  {
+    title: "第四關　because 接兩句",
+    sentences: [
+      { zh: "瓊斯先生對我很生氣，因為我沒做功課。", chunks: ["Mr. Jones", "was mad at me", "because", "I didn't do my homework", "."] },
+      { zh: "我不喜歡下雨天，因為我覺得無聊。", chunks: ["I", "don't like rainy days", "because", "I am bored", "."] },
+      { zh: "她不開心，因為她不能慢跑。", chunks: ["She", "is unhappy", "because", "she can't jog", "."] },
+    ],
+  },
+];
+
+// ===== 狀態 =====
+let levelIndex = 0;
+let sentIndex = 0;
+let placed = [];      // 已放入句子框的 index（對應 bank 的原始位置）
+let bankOrder = [];    // 打亂後的字卡順序（存原始 index）
+let completedLevels = JSON.parse(localStorage.getItem('dh_game_done') || '[]');
+
+function shuffle(arr){
+  const a = arr.slice();
+  for(let i=a.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [a[i],a[j]]=[a[j],a[i]];
+  }
+  return a;
+}
+
+function renderLevels(){
+  const wrap = document.getElementById('levels');
+  wrap.innerHTML = '';
+  LEVELS.forEach((lv, i) => {
+    const b = document.createElement('button');
+    b.className = 'level-btn' + (i === levelIndex ? ' active' : '');
+    b.innerHTML = lv.title.split('　')[0] + (completedLevels.includes(i) ? '<span class="done-mark">✓</span>' : '');
+    b.onclick = () => { levelIndex = i; sentIndex = 0; loadSentence(); };
+    wrap.appendChild(b);
+  });
+}
+
+function loadSentence(){
+  const lv = LEVELS[levelIndex];
+  const s = lv.sentences[sentIndex];
+  placed = [];
+  bankOrder = shuffle(s.chunks.map((_, i) => i));
+  renderLevels();
+  renderCard();
+}
+
+function renderCard(){
+  const lv = LEVELS[levelIndex];
+  const card = document.getElementById('card');
+
+  if (sentIndex >= lv.sentences.length){
+    card.innerHTML = `
+      <div class="done-screen">
+        <div class="big">👍</div>
+        <div style="font-size:18px;font-weight:700;margin-bottom:6px;">這一關完成了！</div>
+        <div style="color:var(--gray);font-size:14px;margin-bottom:20px;">可以點上面換下一關，或再玩一次</div>
+        <button class="btn btn-reset" onclick="sentIndex=0;loadSentence();">再玩一次這一關</button>
+      </div>`;
+    if (!completedLevels.includes(levelIndex)){
+      completedLevels.push(levelIndex);
+      localStorage.setItem('dh_game_done', JSON.stringify(completedLevels));
+      renderLevels();
+    }
+    return;
+  }
+
+  const s = lv.sentences[sentIndex];
+
+  card.innerHTML = `
+    <div class="progress">${lv.title}　第 ${sentIndex + 1} / ${lv.sentences.length} 句</div>
+    <div class="zh">${s.zh}</div>
+    <div class="slots ${placed.length === 0 ? 'empty-hint' : ''}" id="slots"></div>
+    <div class="bank" id="bank"></div>
+    <div class="actions">
+      <button class="btn btn-check" id="checkBtn">檢查答案</button>
+      <button class="btn btn-reset" id="resetBtn">重來</button>
+      <button class="btn btn-next" id="nextBtn" style="display:none;">下一句</button>
+    </div>
+    <div class="feedback" id="feedback"></div>
+  `;
+
+  const slotsEl = document.getElementById('slots');
+  placed.forEach(idx => {
+    const chip = document.createElement('span');
+    chip.className = 'slot-chip';
+    chip.textContent = s.chunks[idx];
+    chip.onclick = () => { placed = placed.filter(p => p !== idx); renderCard(); };
+    slotsEl.appendChild(chip);
+  });
+
+  const bankEl = document.getElementById('bank');
+  bankOrder.forEach(idx => {
+    const btn = document.createElement('button');
+    btn.className = 'chip';
+    btn.textContent = s.chunks[idx];
+    btn.disabled = placed.includes(idx);
+    btn.onclick = () => { placed.push(idx); renderCard(); };
+    bankEl.appendChild(btn);
+  });
+
+  document.getElementById('checkBtn').onclick = checkAnswer;
+  document.getElementById('resetBtn').onclick = () => { placed = []; renderCard(); };
+}
+
+function checkAnswer(){
+  const lv = LEVELS[levelIndex];
+  const s = lv.sentences[sentIndex];
+  const fb = document.getElementById('feedback');
+  const correct = placed.length === s.chunks.length &&
+    placed.every((idx, i) => idx === i);
+
+  if (correct){
+    fb.textContent = '對了！';
+    fb.className = 'feedback ok';
+    document.getElementById('nextBtn').style.display = 'inline-block';
+    document.getElementById('nextBtn').onclick = () => { sentIndex++; loadSentence(); };
+    document.getElementById('checkBtn').disabled = true;
+  } else if (placed.length < s.chunks.length) {
+    fb.textContent = '還沒放完，把所有字卡都放進框裡再檢查';
+    fb.className = 'feedback bad';
+  } else {
+    fb.textContent = '順序不太對，再想想看。可以點框裡的字卡把它移回去';
+    fb.className = 'feedback bad';
+  }
+}
+
+loadSentence();
+</script>
+</body>
+</html>
