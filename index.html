@@ -3,18 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>造句練習</title>
+<title>康軒 B5 L1–L3 複習遊戲</title>
 <style>
   :root{
-    --bg:#F7F3EE;
-    --text:#2B2B2B;
-    --card:#DCD5CB;
-    --terracotta:#B85042;
-    --sage:#6E8B7C;
-    --gray:#8A8A8A;
-    --white:#FFFFFF;
-    --ok:#6E8B7C;
-    --bad:#B85042;
+    --bg:#F7F3EE; --text:#2B2B2B; --card:#DCD5CB; --terracotta:#B85042;
+    --sage:#6E8B7C; --gray:#8A8A8A; --white:#FFFFFF; --ok:#6E8B7C; --bad:#B85042;
   }
   @media (prefers-color-scheme: dark){
     :root:not([data-theme="light"]){
@@ -24,244 +17,372 @@
   *{box-sizing:border-box;}
   html,body{margin:0;padding:0;background:var(--bg);color:var(--text);
     font-family:-apple-system,"Segoe UI","PingFang TC","Microsoft JhengHei",sans-serif;}
-  body{min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:32px 16px 60px;}
-
-  .top{width:100%;max-width:760px;text-align:center;margin-bottom:18px;}
+  body{min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:20px 16px 60px;}
+  .credit{align-self:flex-end;font-size:11px;color:var(--gray);margin-bottom:10px;}
+  .top{width:100%;max-width:760px;text-align:center;margin-bottom:10px;}
   h1{font-size:22px;font-weight:700;margin:0 0 6px;}
   .sub{font-size:14px;color:var(--gray);margin:0;}
 
-  .levels{display:flex;gap:8px;margin:22px 0 26px;flex-wrap:wrap;justify-content:center;}
-  .level-btn{
-    border:1px solid var(--card); background:var(--white); color:var(--text);
-    border-radius:10px; padding:10px 16px; font-size:15px; cursor:pointer;
-    font-weight:600;
+  .tabs,.levels{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin:16px 0;}
+  .tab-btn,.level-btn{
+    border:1px solid var(--card);background:var(--white);color:var(--text);
+    border-radius:10px;padding:10px 18px;font-size:15px;cursor:pointer;font-weight:600;
   }
-  .level-btn.active{background:var(--terracotta); color:#fff; border-color:var(--terracotta);}
-  .level-btn .done-mark{color:var(--sage); margin-left:4px; font-weight:700;}
+  .tab-btn.active,.level-btn.active{background:var(--terracotta);color:#fff;border-color:var(--terracotta);}
+  .level-btn{padding:8px 14px;font-size:14px;}
+  .done-mark{color:var(--sage);margin-left:4px;font-weight:700;}
   .level-btn.active .done-mark{color:#fff;}
 
-  .card{
-    width:100%;max-width:760px; background:var(--white); border:1px solid var(--card);
-    border-radius:16px; padding:28px 24px 24px;
-  }
+  .card{width:100%;max-width:760px;background:var(--white);border:1px solid var(--card);
+    border-radius:16px;padding:26px 22px 22px;}
+  .progress{font-size:13px;color:var(--gray);margin-bottom:14px;}
+  .hint{font-size:15px;color:var(--gray);margin-bottom:10px;}
+  .sentence{font-size:21px;line-height:1.6;margin-bottom:20px;}
+  .blank{display:inline-block;min-width:90px;border-bottom:2px solid var(--text);text-align:center;color:var(--terracotta);font-weight:700;}
 
-  .progress{font-size:13px;color:var(--gray); margin-bottom:14px;}
+  .opts{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;}
+  .opt{background:var(--card);border:none;border-radius:10px;padding:14px 10px;font-size:17px;
+    cursor:pointer;color:var(--text);font-weight:600;}
+  .opt:hover:not(:disabled){background:var(--sage);color:#fff;}
+  .opt.ok{background:var(--ok);color:#fff;}
+  .opt.bad{background:var(--bad);color:#fff;}
+  .opt:disabled{cursor:default;}
 
-  .zh{font-size:16px; color:var(--gray); margin-bottom:18px; line-height:1.5;}
+  .match{display:grid;grid-template-columns:1fr 1fr;gap:12px 24px;margin-bottom:16px;}
+  .match button{border:2px solid var(--card);background:var(--bg);border-radius:10px;
+    padding:14px 10px;font-size:17px;cursor:pointer;color:var(--text);font-weight:600;}
+  .match button.sel{border-color:var(--terracotta);}
+  .match button.done{background:var(--ok);border-color:var(--ok);color:#fff;cursor:default;}
+  .match button.shake{border-color:var(--bad);}
 
-  .slots{
-    display:flex; flex-wrap:wrap; gap:10px; min-height:58px;
-    padding:14px; border:2px dashed var(--card); border-radius:12px; margin-bottom:22px;
-    align-items:center;
-  }
-  .slot-chip{
-    background:var(--bg); border:1px solid var(--card); border-radius:8px;
-    padding:9px 14px; font-size:17px; cursor:pointer; user-select:none;
-  }
+  .slots{display:flex;flex-wrap:wrap;gap:10px;min-height:58px;padding:14px;
+    border:2px dashed var(--card);border-radius:12px;margin-bottom:20px;align-items:center;}
+  .slots.empty-hint::before{content:"點下面的字卡，依序組成句子";color:var(--gray);font-size:14px;}
+  .slot-chip{background:var(--bg);border:1px solid var(--card);border-radius:8px;padding:9px 14px;
+    font-size:17px;cursor:pointer;user-select:none;}
   .slot-chip:hover{border-color:var(--terracotta);}
-  .slots.empty-hint::before{
-    content:"點下面的字卡，依序組成句子"; color:var(--gray); font-size:14px;
-  }
+  .bank{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:20px;}
+  .chip{background:var(--card);border:none;border-radius:8px;padding:10px 16px;font-size:17px;
+    cursor:pointer;color:var(--text);font-weight:600;}
+  .chip:hover{background:var(--sage);color:#fff;}
+  .chip:disabled{opacity:0;pointer-events:none;}
 
-  .bank{display:flex; flex-wrap:wrap; gap:10px; margin-bottom:22px;}
-  .chip{
-    background:var(--card); border:none; border-radius:8px; padding:10px 16px;
-    font-size:17px; cursor:pointer; color:var(--text); font-weight:600;
-  }
-  .chip:hover{background:var(--sage); color:#fff;}
-  .chip:disabled{opacity:0; pointer-events:none;}
-
-  .actions{display:flex; gap:10px; flex-wrap:wrap;}
-  .btn{
-    border:none; border-radius:10px; padding:12px 20px; font-size:15px;
-    cursor:pointer; font-weight:700;
-  }
-  .btn-check{background:var(--terracotta); color:#fff;}
-  .btn-reset{background:var(--white); color:var(--text); border:1px solid var(--card);}
-  .btn-next{background:var(--sage); color:#fff;}
-  .btn:disabled{opacity:.4; cursor:default;}
-
-  .feedback{margin-top:16px; font-size:15px; min-height:24px; font-weight:600;}
-  .feedback.ok{color:var(--ok);}
-  .feedback.bad{color:var(--bad);}
-
-  .done-screen{text-align:center; padding:40px 10px;}
-  .done-screen .big{font-size:40px; margin-bottom:10px;}
+  .actions{display:flex;gap:10px;flex-wrap:wrap;}
+  .btn{border:none;border-radius:10px;padding:12px 20px;font-size:15px;cursor:pointer;font-weight:700;}
+  .btn-check{background:var(--terracotta);color:#fff;}
+  .btn-reset{background:var(--white);color:var(--text);border:1px solid var(--card);}
+  .btn-next{background:var(--sage);color:#fff;}
+  .btn:disabled{opacity:.4;cursor:default;}
+  .feedback{margin-top:14px;font-size:15px;min-height:24px;font-weight:600;}
+  .feedback.ok{color:var(--ok);} .feedback.bad{color:var(--bad);}
+  .done-screen{text-align:center;padding:36px 10px;}
+  .done-screen .big{font-size:38px;margin-bottom:8px;}
 </style>
 </head>
 <body>
 
+<div class="credit">自編教材　Erika Huang 黃柏珊　2026　僅供學伴課使用</div>
+
 <div class="top">
-  <h1>造句練習</h1>
-  <p class="sub">一關一關慢慢來，不會的句子可以按「重來」</p>
+  <h1>L1–L3 複習</h1>
+  <p class="sub">慢慢來，沒有時間限制</p>
 </div>
 
-<div class="levels" id="levels"></div>
-
+<div class="tabs" id="tabs"></div>
+<div class="levels" id="levels" style="display:none;"></div>
 <div class="card" id="card"></div>
 
 <script>
-// ===== 四關句型資料 =====
-// chunks：句子切成的字卡，answer 用 index 順序代表正確排法（這裡字卡本身就依序打亂即可）
-const LEVELS = [
-  {
-    title: "第一關　A is B",
-    sentences: [
-      { zh: "我阿姨是一位工程師。", chunks: ["My aunt", "is", "an engineer", "."] },
-      { zh: "賴瑞是一位誠實的學生。", chunks: ["Larry", "is", "an honest student", "."] },
-      { zh: "凱西是一位勤勉的學生。", chunks: ["Kathy", "is", "a hard-working student", "."] },
-      { zh: "女神卡卡是一個榜樣。", chunks: ["Lady Gaga", "is", "a role model", "."] },
-      { zh: "艾倫害怕蜘蛛。", chunks: ["Allan", "is", "afraid of spiders", "."] },
-    ],
-  },
-  {
-    title: "第二關　主詞＋動詞＋受詞",
-    sentences: [
-      { zh: "珍妮烤了蛋糕。", chunks: ["Jenny", "baked", "the cake", "."] },
-      { zh: "山姆煎了兩顆蛋。", zh2: "", chunks: ["Sam", "fried", "two eggs", "."] },
-      { zh: "我們慶祝我的生日。", chunks: ["We", "celebrate", "my birthday", "."] },
-      { zh: "約瑟夫養了一隻蜘蛛當寵物。", chunks: ["Joseph", "keeps", "a spider", "as his pet", "."] },
-      { zh: "我到處找我的手機。", chunks: ["I", "looked", "everywhere", "for my cellphone", "."] },
-    ],
-  },
-  {
-    title: "第三關　be＋形容詞＋介系詞",
-    sentences: [
-      { zh: "我厭倦了坐在沙發上。", chunks: ["I", "am", "tired of", "sitting on the couch", "."] },
-      { zh: "這些孩子對這部電影感到厭煩。", chunks: ["The kids", "are", "bored with", "the movie", "."] },
-      { zh: "艾倫害怕蜘蛛。", chunks: ["Allan", "is", "scared of", "spiders", "."] },
-      { zh: "我對我妹妹很生氣。", chunks: ["I", "was", "mad at", "my sister", "."] },
-      { zh: "她對漫畫書很感興趣。", chunks: ["She", "is", "interested in", "comic books", "."] },
-    ],
-  },
-  {
-    title: "第四關　because 接兩句",
-    sentences: [
-      { zh: "瓊斯先生對我很生氣，因為我沒做功課。", chunks: ["Mr. Jones", "was mad at me", "because", "I didn't do my homework", "."] },
-      { zh: "我不喜歡下雨天，因為我覺得無聊。", chunks: ["I", "don't like rainy days", "because", "I am bored", "."] },
-      { zh: "她不開心，因為她不能慢跑。", chunks: ["She", "is unhappy", "because", "she can't jog", "."] },
-    ],
-  },
+// ================= 資料 =================
+// 單字填空：w=單字、f=句子裡出現的形式、s=句子（___ 是空格）、zh=中文提示
+// 新增字時照格式加一行即可。句子一律用課本或講義原句。
+const FILL = [
+  // L1
+  {w:"subject",f:"subject",s:"Jay does well in every ___.",zh:"學科"},
+  {w:"history",f:"history",s:"The beautiful temple has a long ___.",zh:"歷史"},
+  {w:"topic",f:"topic",s:"The ___ of today's meeting is air pollution.",zh:"主題"},
+  {w:"hairdryer",f:"hairdryer",s:"You can't use that ___. It is broken.",zh:"吹風機"},
+  {w:"yet",f:"yet",s:"Has Maggie done the dishes ___?",zh:"還（沒）；尚（未）"},
+  {w:"century",f:"century",s:"We live in the 21st ___.",zh:"世紀"},
+  {w:"freeze",f:"freeze",s:"The lakes here ___ in winter.",zh:"凍結；結冰"},
+  {w:"potato",f:"potato",s:"Tina made ___ salad for dinner tonight.",zh:"馬鈴薯"},
+  {w:"stick",f:"sticks",s:"Let's find some dry ___ to make a fire.",zh:"枝條"},
+  {w:"American",f:"American",s:"Stephen Curry is an ___ basketball player.",zh:"美國的"},
+  {w:"soldier",f:"soldier",s:"John wanted to be a ___, but he became a teacher in the end.",zh:"士兵；軍人"},
+  {w:"main",f:"main",s:"We don't have enough money. That's our ___ problem.",zh:"主要的"},
+  {w:"language",f:"languages",s:"How many foreign ___ can you speak?",zh:"語言"},
+  {w:"since",f:"since",s:"James has worked for the restaurant ___ 2015.",zh:"自……以來"},
+  {w:"celebrate",f:"celebrate",s:"We are going out for a meal to ___ my birthday.",zh:"慶祝"},
+  {w:"national",f:"national",s:"Students don't go to school on a ___ holiday.",zh:"國家的；國立的"},
+  {w:"thick",f:"thick",s:"Jerry doesn't like to wear any ___ sweaters.",zh:"粗的；厚的"},
+  {w:"fry",f:"fry",s:"They would cut potatoes into long thin sticks and ___ them.",zh:"油炸；油煎"},
+  // L2
+  {w:"delivery",f:"Delivery",s:"___ is free for orders of NT$500 or over.",zh:"運送"},
+  {w:"among",f:"among",s:"Jake is the tallest ___ those boys.",zh:"在……中"},
+  {w:"age",f:"age",s:"Grace left her hometown at ___ 18.",zh:"年齡"},
+  {w:"chart",f:"chart",s:"Look at the weather ___. It will be sunny tomorrow.",zh:"圖表"},
+  {w:"page",f:"page",s:"Please turn to ___ 5.",zh:"頁；網頁"},
+  {w:"interested",f:"interested",s:"Ben is ___ in the history of the USA.",zh:"感興趣的"},
+  {w:"reason",f:"reason",s:"Sara went home early from school, but she didn't tell me the ___.",zh:"原因"},
+  {w:"helpful",f:"helpful",s:"The staff at the hotel were very ___ and friendly.",zh:"有用的；肯幫忙的"},
+  {w:"tired",f:"tired",s:"Dave was ___ after a long day at the office.",zh:"疲勞的"},
+  {w:"offer",f:"offer",s:"I would like to ___ help if you need it.",zh:"提供"},
+  {w:"discount",f:"discount",s:"You can get a 10% ___ on all books today.",zh:"折扣"},
+  // L3
+  {w:"form",f:"formed",s:"The students ___ a line behind their teacher.",zh:"形成"},
+  {w:"childhood",f:"childhood",s:"I had a happy ___.",zh:"童年"},
+  {w:"relative",f:"relatives",s:"All my ___ will come to my grandpa's birthday party.",zh:"親戚"},
+  {w:"expect",f:"expect",s:"I didn't ___ to see Mr. Simpson at the meeting.",zh:"期待；預計"},
+  {w:"public",f:"public",s:"The ___ library isn't open on Mondays.",zh:"公共的；大眾"},
+  {w:"such as",f:"such as",s:"I like outdoor sports, ___ soccer and baseball.",zh:"例如"},
+  {w:"everywhere",f:"everywhere",s:"I looked ___ for my cellphone.",zh:"到處"},
+  {w:"company",f:"company",s:"Mr. Jones joined our ___ last month.",zh:"公司"},
+  {w:"equal",f:"equal",s:"All people are ___.",zh:"平等的"},
+  {w:"hard-working",f:"hard-working",s:"Kathy studies a lot. She is a ___ student.",zh:"勤勉的"},
+  {w:"lawyer",f:"lawyer",s:"He didn't answer any questions until his ___ came.",zh:"律師"},
+  {w:"engineer",f:"engineer",s:"My aunt is an ___. She can fix computers.",zh:"工程師"},
+  {w:"president",f:"president",s:"Who is the ___ of the USA?",zh:"總統"},
+  {w:"model",f:"model",s:"Lady Gaga is a role ___ for many teenagers.",zh:"榜樣；模範"},
+  {w:"picture",f:"picture",s:"I can't ___ David as a police officer.",zh:"想像"},
 ];
 
-// ===== 狀態 =====
-let levelIndex = 0;
-let sentIndex = 0;
-let placed = [];      // 已放入句子框的 index（對應 bank 的原始位置）
-let bankOrder = [];    // 打亂後的字卡順序（存原始 index）
-let completedLevels = JSON.parse(localStorage.getItem('dh_game_done') || '[]');
+// 單字配對：英文 → 中文
+const PAIRS = [
+  // L1
+  ["chocolate","巧克力"],["bunny","小兔子"],["candy","糖果"],["pumpkin","南瓜"],["bake","烘烤"],
+  ["Christmas Eve","聖誕節前夕；平安夜"],["nobody","沒有人"],["wave","揮（手）"],["inch","英寸"],["king","國王；王者"],
+  // L2
+  ["driver","駕駛；司機"],["uniform","制服"],["excited","感到興奮的"],["boring","無聊的；無趣的"],
+  ["bored","感到厭煩的"],["tiring","令人疲倦的"],["surprising","令人驚訝的"],["surprised","感到驚訝的"],
+  ["tip","給……小費；小費"],["couch","沙發"],["interest","興趣；使……感興趣"],["mind","介意"],
+  ["chance","機會"],["list","清單"],["at least","至少"],["location","位置"],["tap","輕觸"],["button","按鈕；鈕扣"],
+  // L3
+  ["lovely","討人喜歡的；漂亮的"],["born","出生的；誕生的"],["present","禮物；展現"],["pretty","漂亮的"],
+  ["brave","勇敢的"],["be filled with","充滿"],["stupid","愚蠢的；笨的"],["honest","誠實的"],
+  ["spider","蜘蛛"],["comic","漫畫"],["mad","惱火的"],["totally","完全"],["understand","了解"],
+  ["hope","希望"],["allow","允許"],["laugh at","嘲笑"],
+];
+// 意思太接近、不放在同一頁的組合（避免有爭議）
+const NOT_SAME_PAGE = [["lovely","pretty"],["excited","surprised"],["bored","boring"],["surprised","surprising"],["boring","tiring"]];
 
-function shuffle(arr){
-  const a = arr.slice();
-  for(let i=a.length-1;i>0;i--){
-    const j = Math.floor(Math.random()*(i+1));
-    [a[i],a[j]]=[a[j],a[i]];
-  }
-  return a;
+// 造句練習：chunks 的原始順序就是正確答案
+const LEVELS = [
+  {title:"第一關　A is B",sentences:[
+    {zh:"我阿姨是一位工程師。",chunks:["My aunt","is","an engineer","."]},
+    {zh:"賴瑞是一位誠實的學生。",chunks:["Larry","is","an honest student","."]},
+    {zh:"凱西是一位勤勉的學生。",chunks:["Kathy","is","a hard-working student","."]},
+    {zh:"女神卡卡是一個榜樣。",chunks:["Lady Gaga","is","a role model","."]},
+    {zh:"艾倫害怕蜘蛛。",chunks:["Allan","is","afraid of spiders","."]},
+  ]},
+  {title:"第二關　主詞＋動詞＋受詞",sentences:[
+    {zh:"珍妮烤了蛋糕。",chunks:["Jenny","baked","the cake","."]},
+    {zh:"山姆煎了兩顆蛋。",chunks:["Sam","fried","two eggs","."]},
+    {zh:"我們慶祝我的生日。",chunks:["We","celebrate","my birthday","."]},
+    {zh:"約瑟夫養了一隻蜘蛛當寵物。",chunks:["Joseph","keeps","a spider","as his pet","."]},
+  ]},
+  {title:"第三關　be＋形容詞＋介系詞",sentences:[
+    {zh:"我厭倦了坐在沙發上。",chunks:["I","am","tired of","sitting on the couch","."]},
+    {zh:"這些孩子對這部電影感到厭煩。",chunks:["The kids","are","bored with","the movie","."]},
+    {zh:"艾倫害怕蜘蛛。",chunks:["Allan","is","scared of","spiders","."]},
+    {zh:"我對我妹妹很生氣。",chunks:["I","was","mad at","my sister","."]},
+    {zh:"她對漫畫書很感興趣。",chunks:["She","is","interested in","comic books","."]},
+  ]},
+  {title:"第四關　because 接兩句",sentences:[
+    {zh:"瓊斯先生對我很生氣，因為我沒做功課。",chunks:["Mr. Jones","was mad at me","because","I didn't do my homework","."]},
+    {zh:"我不喜歡下雨天，因為我覺得無聊。",chunks:["I","don't like rainy days","because","I am bored","."]},
+    {zh:"她不開心，因為她不能慢跑。",chunks:["She","is unhappy","because","she can't jog","."]},
+  ]},
+  {title:"第五關　片語",sentences:[
+    {zh:"街上擠滿了車和人。",chunks:["The streets","are filled with","cars and people","."]},
+    {zh:"這個蛋糕裡面塞滿了奶油。",chunks:["The cake","is filled with","cream","."]},
+    {zh:"別再嘲笑你哥哥了，莉莉。",chunks:["Stop","laughing at","your brother, Lily","."]},
+    {zh:"潘正在把水注滿浴缸。",chunks:["Pam","is filling","the tub","with water","."]},
+  ]},
+];
+
+// ================= 共用工具 =================
+const $ = id => document.getElementById(id);
+function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+let tab = "fill";
+
+function renderTabs(){
+  const t = $("tabs"); t.innerHTML="";
+  [["fill","單字填空"],["match","單字配對"],["build","造句練習"]].forEach(([k,label])=>{
+    const b=document.createElement("button");
+    b.className="tab-btn"+(tab===k?" active":"");
+    b.textContent=label;
+    b.onclick=()=>{tab=k;renderTabs();start();};
+    t.appendChild(b);
+  });
+  $("levels").style.display = tab==="build" ? "flex" : "none";
 }
+function start(){ if(tab==="fill") startFill(); else if(tab==="match") startMatch(); else {sentIndex=0;loadSentence();} }
+
+// ================= 單字填空 =================
+let fillQs=[], fillI=0, fillScore=0;
+function startFill(){
+  fillQs = shuffle(FILL).slice(0,15);
+  fillI=0; fillScore=0; renderFill();
+}
+function renderFill(){
+  const card=$("card");
+  if(fillI>=fillQs.length){
+    card.innerHTML=`<div class="done-screen"><div class="big">👍</div>
+      <div style="font-size:18px;font-weight:700;margin-bottom:6px;">完成了　${fillScore} / ${fillQs.length}</div>
+      <div style="color:var(--gray);font-size:14px;margin-bottom:18px;">每次抽到的題目都不一樣</div>
+      <button class="btn btn-check" id="again">再來一輪</button></div>`;
+    $("again").onclick=startFill; return;
+  }
+  const q=fillQs[fillI];
+  const distract = shuffle(FILL.filter(x=>x.w!==q.w)).slice(0,3).map(x=>x.f);
+  const opts = shuffle([q.f,...distract]);
+  const sentenceHTML = q.s.replace("___",'<span class="blank">&nbsp;&nbsp;&nbsp;&nbsp;</span>');
+  card.innerHTML=`
+    <div class="progress">單字填空　第 ${fillI+1} / ${fillQs.length} 題</div>
+    <div class="hint">中文提示：${q.zh}</div>
+    <div class="sentence">${sentenceHTML}</div>
+    <div class="opts" id="opts"></div>
+    <div class="feedback" id="fb"></div>
+    <div class="actions"><button class="btn btn-next" id="nx" style="display:none;">下一題</button></div>`;
+  const box=$("opts");
+  opts.forEach(o=>{
+    const b=document.createElement("button"); b.className="opt"; b.textContent=o;
+    b.onclick=()=>{
+      [...box.children].forEach(c=>{
+        c.disabled=true;
+        if(c.textContent===q.f) c.classList.add("ok");
+      });
+      if(o===q.f){fillScore++; $("fb").textContent="對了！"; $("fb").className="feedback ok";}
+      else{b.classList.add("bad"); $("fb").textContent="答案是 "+q.f; $("fb").className="feedback bad";}
+      $("nx").style.display="inline-block";
+      $("nx").onclick=()=>{fillI++;renderFill();};
+    };
+    box.appendChild(b);
+  });
+}
+
+// ================= 單字配對 =================
+let matchPages=[], matchI=0;
+function pageOK(page){
+  const names=page.map(p=>p[0]);
+  return !NOT_SAME_PAGE.some(([a,b])=>names.includes(a)&&names.includes(b));
+}
+function buildPages(){
+  for(let tries=0;tries<500;tries++){
+    const s=shuffle(PAIRS), pages=[];
+    for(let i=0;i<s.length;i+=4) pages.push(s.slice(i,i+4));
+    if(pages.every(pageOK)) return pages;
+  }
+  const s=shuffle(PAIRS), pages=[]; for(let i=0;i<s.length;i+=4) pages.push(s.slice(i,i+4)); return pages;
+}
+function startMatch(){ matchPages=buildPages(); matchI=0; renderMatch(); }
+function renderMatch(){
+  const card=$("card");
+  if(matchI>=matchPages.length){
+    card.innerHTML=`<div class="done-screen"><div class="big">👍</div>
+      <div style="font-size:18px;font-weight:700;margin-bottom:18px;">全部配完了</div>
+      <button class="btn btn-check" id="again">再來一輪</button></div>`;
+    $("again").onclick=startMatch; return;
+  }
+  const page=matchPages[matchI];
+  card.innerHTML=`<div class="progress">單字配對　第 ${matchI+1} / ${matchPages.length} 組</div>
+    <div class="hint">先點左邊的英文，再點右邊的中文</div>
+    <div class="match" id="mt"></div>
+    <div class="feedback" id="fb"></div>`;
+  const left=page.map(p=>({t:p[0],k:p[0]}));
+  const right=shuffle(page.map(p=>({t:p[1],k:p[0]})));
+  let sel=null, matched=0;
+  const mt=$("mt");
+  const lbtns=[], rbtns=[];
+  left.forEach(l=>{const b=document.createElement("button");b.textContent=l.t;b.dataset.k=l.k;lbtns.push(b);});
+  right.forEach(r=>{const b=document.createElement("button");b.textContent=r.t;b.dataset.k=r.k;rbtns.push(b);});
+  for(let i=0;i<4;i++){mt.appendChild(lbtns[i]);mt.appendChild(rbtns[i]);}
+  lbtns.forEach(b=>b.onclick=()=>{
+    if(b.classList.contains("done")) return;
+    lbtns.forEach(x=>x.classList.remove("sel")); b.classList.add("sel"); sel=b;
+  });
+  rbtns.forEach(b=>b.onclick=()=>{
+    if(b.classList.contains("done")||!sel) return;
+    if(sel.dataset.k===b.dataset.k){
+      sel.classList.remove("sel"); sel.classList.add("done"); b.classList.add("done"); sel=null; matched++;
+      if(matched===4){
+        $("fb").textContent="這一組完成！"; $("fb").className="feedback ok";
+        setTimeout(()=>{matchI++;renderMatch();},900);
+      }
+    } else {
+      b.classList.add("shake"); setTimeout(()=>b.classList.remove("shake"),500);
+      $("fb").textContent="再想想看"; $("fb").className="feedback bad";
+    }
+  });
+}
+
+// ================= 造句練習 =================
+let levelIndex=0, sentIndex=0, placed=[], bankOrder=[];
+let completedLevels=[];
+try{ completedLevels=JSON.parse(localStorage.getItem('dh_game_done')||'[]'); }catch(e){ completedLevels=[]; }
+function saveDone(){ try{localStorage.setItem('dh_game_done',JSON.stringify(completedLevels));}catch(e){} }
 
 function renderLevels(){
-  const wrap = document.getElementById('levels');
-  wrap.innerHTML = '';
-  LEVELS.forEach((lv, i) => {
-    const b = document.createElement('button');
-    b.className = 'level-btn' + (i === levelIndex ? ' active' : '');
-    b.innerHTML = lv.title.split('　')[0] + (completedLevels.includes(i) ? '<span class="done-mark">✓</span>' : '');
-    b.onclick = () => { levelIndex = i; sentIndex = 0; loadSentence(); };
-    wrap.appendChild(b);
+  const w=$("levels"); w.innerHTML="";
+  LEVELS.forEach((lv,i)=>{
+    const b=document.createElement("button");
+    b.className="level-btn"+(i===levelIndex?" active":"");
+    b.innerHTML=lv.title.split("　")[0]+(completedLevels.includes(i)?'<span class="done-mark">✓</span>':"");
+    b.onclick=()=>{levelIndex=i;sentIndex=0;loadSentence();};
+    w.appendChild(b);
   });
 }
-
 function loadSentence(){
-  const lv = LEVELS[levelIndex];
-  const s = lv.sentences[sentIndex];
-  placed = [];
-  bankOrder = shuffle(s.chunks.map((_, i) => i));
-  renderLevels();
-  renderCard();
+  const s=LEVELS[levelIndex].sentences[sentIndex];
+  placed=[]; if(s) bankOrder=shuffle(s.chunks.map((_,i)=>i));
+  renderLevels(); renderBuild();
 }
-
-function renderCard(){
-  const lv = LEVELS[levelIndex];
-  const card = document.getElementById('card');
-
-  if (sentIndex >= lv.sentences.length){
-    card.innerHTML = `
-      <div class="done-screen">
-        <div class="big">👍</div>
-        <div style="font-size:18px;font-weight:700;margin-bottom:6px;">這一關完成了！</div>
-        <div style="color:var(--gray);font-size:14px;margin-bottom:20px;">可以點上面換下一關，或再玩一次</div>
-        <button class="btn btn-reset" onclick="sentIndex=0;loadSentence();">再玩一次這一關</button>
-      </div>`;
-    if (!completedLevels.includes(levelIndex)){
-      completedLevels.push(levelIndex);
-      localStorage.setItem('dh_game_done', JSON.stringify(completedLevels));
-      renderLevels();
-    }
+function renderBuild(){
+  const lv=LEVELS[levelIndex], card=$("card");
+  if(sentIndex>=lv.sentences.length){
+    card.innerHTML=`<div class="done-screen"><div class="big">👍</div>
+      <div style="font-size:18px;font-weight:700;margin-bottom:6px;">這一關完成了！</div>
+      <div style="color:var(--gray);font-size:14px;margin-bottom:18px;">可以點上面換下一關，或再玩一次</div>
+      <button class="btn btn-reset" id="again">再玩一次這一關</button></div>`;
+    $("again").onclick=()=>{sentIndex=0;loadSentence();};
+    if(!completedLevels.includes(levelIndex)){completedLevels.push(levelIndex);saveDone();renderLevels();}
     return;
   }
-
-  const s = lv.sentences[sentIndex];
-
-  card.innerHTML = `
-    <div class="progress">${lv.title}　第 ${sentIndex + 1} / ${lv.sentences.length} 句</div>
-    <div class="zh">${s.zh}</div>
-    <div class="slots ${placed.length === 0 ? 'empty-hint' : ''}" id="slots"></div>
+  const s=lv.sentences[sentIndex];
+  card.innerHTML=`
+    <div class="progress">${lv.title}　第 ${sentIndex+1} / ${lv.sentences.length} 句</div>
+    <div class="hint" style="font-size:17px;">${s.zh}</div>
+    <div class="slots ${placed.length===0?"empty-hint":""}" id="slots"></div>
     <div class="bank" id="bank"></div>
     <div class="actions">
-      <button class="btn btn-check" id="checkBtn">檢查答案</button>
-      <button class="btn btn-reset" id="resetBtn">重來</button>
-      <button class="btn btn-next" id="nextBtn" style="display:none;">下一句</button>
+      <button class="btn btn-check" id="chk">檢查答案</button>
+      <button class="btn btn-reset" id="rst">重來</button>
+      <button class="btn btn-next" id="nx" style="display:none;">下一句</button>
     </div>
-    <div class="feedback" id="feedback"></div>
-  `;
-
-  const slotsEl = document.getElementById('slots');
-  placed.forEach(idx => {
-    const chip = document.createElement('span');
-    chip.className = 'slot-chip';
-    chip.textContent = s.chunks[idx];
-    chip.onclick = () => { placed = placed.filter(p => p !== idx); renderCard(); };
-    slotsEl.appendChild(chip);
+    <div class="feedback" id="fb"></div>`;
+  placed.forEach(idx=>{
+    const c=document.createElement("span"); c.className="slot-chip"; c.textContent=s.chunks[idx];
+    c.onclick=()=>{placed=placed.filter(p=>p!==idx);renderBuild();};
+    $("slots").appendChild(c);
   });
-
-  const bankEl = document.getElementById('bank');
-  bankOrder.forEach(idx => {
-    const btn = document.createElement('button');
-    btn.className = 'chip';
-    btn.textContent = s.chunks[idx];
-    btn.disabled = placed.includes(idx);
-    btn.onclick = () => { placed.push(idx); renderCard(); };
-    bankEl.appendChild(btn);
+  bankOrder.forEach(idx=>{
+    const b=document.createElement("button"); b.className="chip"; b.textContent=s.chunks[idx];
+    b.disabled=placed.includes(idx);
+    b.onclick=()=>{placed.push(idx);renderBuild();};
+    $("bank").appendChild(b);
   });
-
-  document.getElementById('checkBtn').onclick = checkAnswer;
-  document.getElementById('resetBtn').onclick = () => { placed = []; renderCard(); };
+  $("rst").onclick=()=>{placed=[];renderBuild();};
+  $("chk").onclick=()=>{
+    const fb=$("fb");
+    const ok=placed.length===s.chunks.length&&placed.every((p,i)=>p===i);
+    if(ok){fb.textContent="對了！";fb.className="feedback ok";$("nx").style.display="inline-block";
+      $("nx").onclick=()=>{sentIndex++;loadSentence();};$("chk").disabled=true;}
+    else if(placed.length<s.chunks.length){fb.textContent="還沒放完，把所有字卡都放進框裡再檢查";fb.className="feedback bad";}
+    else{fb.textContent="順序不太對，再想想看。可以點框裡的字卡把它移回去";fb.className="feedback bad";}
+  };
 }
 
-function checkAnswer(){
-  const lv = LEVELS[levelIndex];
-  const s = lv.sentences[sentIndex];
-  const fb = document.getElementById('feedback');
-  const correct = placed.length === s.chunks.length &&
-    placed.every((idx, i) => idx === i);
-
-  if (correct){
-    fb.textContent = '對了！';
-    fb.className = 'feedback ok';
-    document.getElementById('nextBtn').style.display = 'inline-block';
-    document.getElementById('nextBtn').onclick = () => { sentIndex++; loadSentence(); };
-    document.getElementById('checkBtn').disabled = true;
-  } else if (placed.length < s.chunks.length) {
-    fb.textContent = '還沒放完，把所有字卡都放進框裡再檢查';
-    fb.className = 'feedback bad';
-  } else {
-    fb.textContent = '順序不太對，再想想看。可以點框裡的字卡把它移回去';
-    fb.className = 'feedback bad';
-  }
-}
-
-loadSentence();
+renderTabs(); start();
 </script>
 </body>
 </html>
